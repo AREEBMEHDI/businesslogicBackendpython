@@ -2,10 +2,10 @@ import uuid
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from flask_bcrypt import Bcrypt
-from helper_func import detect_image_extension
+# from helper_func import detect_image_extension
 from models import db, Users, Clients, Auth, UsersInfo, UserSocial
-from validations import is_valid_profile_image, is_allowed_social_platform, is_valid_social_handle
-from spaces import get_spaces, generate_signed_get_url, DO_SPACES_BUCKET
+# from validations import is_valid_profile_image, is_allowed_social_platform, is_valid_social_handle
+# from spaces import get_spaces, generate_signed_get_url, DO_SPACES_BUCKET
 import imghdr
 from exceptions import (
     ClientCreationError,
@@ -188,199 +188,199 @@ def create_client_with_profile(
         raise ClientCreationError("Failed to create client with profile") from e
     
 
-def upload_profile_photo_to_spaces(
-    *,
-    file,
-    user_id: str,
-) -> str:
-    """
-    Uploads profile photo to DigitalOcean Spaces.
-    Returns object key.
-    """
+# def upload_profile_photo_to_spaces(
+#     *,
+#     file,
+#     user_id: str,
+# ) -> str:
+#     """
+#     Uploads profile photo to DigitalOcean Spaces.
+#     Returns object key.
+#     """
 
-    if not is_valid_profile_image(file):
-        raise InvalidProfileImage("Invalid profile image")
+#     if not is_valid_profile_image(file):
+#         raise InvalidProfileImage("Invalid profile image")
 
-    # Safe to read now (stream was rewound)
-    data = file.read()
+#     # Safe to read now (stream was rewound)
+#     data = file.read()
 
-    # Extension detection (not validation)
-    try:
-        ext = detect_image_extension(data)
-    except ValueError:
-        raise InvalidProfileImage("Invalid profile image")
-
-
-    key = f"pfp/{user_id}/{uuid.uuid4()}.{ext}"
-
-    try:
-        s3 = get_spaces()
-        s3.put_object(
-            Bucket=DO_SPACES_BUCKET,
-            Key=key,
-            Body=data,
-            ContentType=file.mimetype,
-            ACL="private",
-            )
-    except Exception as e:
-        raise ProfilePhotoUploadError("Failed to upload profile photo") from e
-
-    return key
-
-def delete_profile_photo_from_spaces(
-    *,
-    profile_photo_key: str,
-) -> None:
-    """
-    Deletes profile photo from Spaces (best-effort).
-    """
-
-    if not profile_photo_key:
-        return
-
-    try:
-        s3 = get_spaces()
-        s3.delete_object(
-            Bucket=DO_SPACES_BUCKET,
-            Key=profile_photo_key,
-        )
-    except Exception as e:
-        raise ProfilePhotoDeleteError("Failed to delete profile photo") from e
-
-def set_user_profile_photo_key(
-    *,
-    user_id: str,
-    profile_photo_key: str,
-) -> str | None:
-    """
-    Stores new profile_photo_key.
-    Returns old key (if any).
-    """
-
-    info = UsersInfo.query.filter_by(user_id=user_id).first()
-    if not info:
-        raise UserProfileNotFound("User profile not found")
-
-    old_key = info.profile_photo_key
-
-    info.profile_photo_key = profile_photo_key
-    info.updated_at = datetime.utcnow()
-
-    db.session.add(info)
-    return old_key
-
-def update_user_profile_photo(
-    *,
-    user_id: str,
-    file,
-) -> str:
-    """
-    Atomic profile photo update:
-    - upload new photo
-    - update DB
-    - delete old photo safely
-    """
-
-    # 1️⃣ Upload first
-    new_key = upload_profile_photo_to_spaces(
-            file=file,
-            user_id=user_id,
-        )
+#     # Extension detection (not validation)
+#     try:
+#         ext = detect_image_extension(data)
+#     except ValueError:
+#         raise InvalidProfileImage("Invalid profile image")
 
 
-    try:
-        # 2️⃣ Update DB
-        old_key = set_user_profile_photo_key(
-            user_id=user_id,
-            profile_photo_key=new_key,
-        )
-        db.session.commit()
+#     key = f"pfp/{user_id}/{uuid.uuid4()}.{ext}"
 
-    except Exception as e:
-        db.session.rollback()
+#     try:
+#         s3 = get_spaces()
+#         s3.put_object(
+#             Bucket=DO_SPACES_BUCKET,
+#             Key=key,
+#             Body=data,
+#             ContentType=file.mimetype,
+#             ACL="private",
+#             )
+#     except Exception as e:
+#         raise ProfilePhotoUploadError("Failed to upload profile photo") from e
 
-        # Cleanup newly uploaded file
-        try:
-            delete_profile_photo_from_spaces(
-                profile_photo_key=new_key
-            )
-        except Exception:
-            pass
+#     return key
 
-        raise UserProfilePhotoUpdateError("Failed to update profile photo") from e
+# def delete_profile_photo_from_spaces(
+#     *,
+#     profile_photo_key: str,
+# ) -> None:
+#     """
+#     Deletes profile photo from Spaces (best-effort).
+#     """
 
-    # 3️⃣ Delete old photo AFTER commit (best effort)
-    if old_key:
-        try:
-            delete_profile_photo_from_spaces(
-                profile_photo_key=old_key
-            )
-        except ProfilePhotoDeleteError:
-            pass
+#     if not profile_photo_key:
+#         return
 
-    return new_key
+#     try:
+#         s3 = get_spaces()
+#         s3.delete_object(
+#             Bucket=DO_SPACES_BUCKET,
+#             Key=profile_photo_key,
+#         )
+#     except Exception as e:
+#         raise ProfilePhotoDeleteError("Failed to delete profile photo") from e
+
+# def set_user_profile_photo_key(
+#     *,
+#     user_id: str,
+#     profile_photo_key: str,
+# ) -> str | None:
+#     """
+#     Stores new profile_photo_key.
+#     Returns old key (if any).
+#     """
+
+#     info = UsersInfo.query.filter_by(user_id=user_id).first()
+#     if not info:
+#         raise UserProfileNotFound("User profile not found")
+
+#     old_key = info.profile_photo_key
+
+#     info.profile_photo_key = profile_photo_key
+#     info.updated_at = datetime.utcnow()
+
+#     db.session.add(info)
+#     return old_key
+
+# def update_user_profile_photo(
+#     *,
+#     user_id: str,
+#     file,
+# ) -> str:
+#     """
+#     Atomic profile photo update:
+#     - upload new photo
+#     - update DB
+#     - delete old photo safely
+#     """
+
+#     # 1️⃣ Upload first
+#     new_key = upload_profile_photo_to_spaces(
+#             file=file,
+#             user_id=user_id,
+#         )
 
 
-def get_profile_photo_url_for_user(
-    *,
-    user_id: str,
-) -> str:
-    """
-    Returns a signed URL for a user's profile photo.
-    Raises UserProfileNotFound if photo not set.
-    """
+#     try:
+#         # 2️⃣ Update DB
+#         old_key = set_user_profile_photo_key(
+#             user_id=user_id,
+#             profile_photo_key=new_key,
+#         )
+#         db.session.commit()
 
-    info = UsersInfo.query.filter_by(user_id=user_id).first()
-    if not info or not info.profile_photo_key:
-        raise UserProfilePhotoNotFound("Profile photo not found")
+#     except Exception as e:
+#         db.session.rollback()
 
-    return generate_signed_get_url(info.profile_photo_key)
+#         # Cleanup newly uploaded file
+#         try:
+#             delete_profile_photo_from_spaces(
+#                 profile_photo_key=new_key
+#             )
+#         except Exception:
+#             pass
+
+#         raise UserProfilePhotoUpdateError("Failed to update profile photo") from e
+
+#     # 3️⃣ Delete old photo AFTER commit (best effort)
+#     if old_key:
+#         try:
+#             delete_profile_photo_from_spaces(
+#                 profile_photo_key=old_key
+#             )
+#         except ProfilePhotoDeleteError:
+#             pass
+
+#     return new_key
 
 
-def upsert_user_social(
-    *,
-    user_id: str,
-    platform: str,
-    handle: str,
-) -> None:
-    """
-    Create or update a user's social handle for a platform.
-    One social per platform per user.
-    """
+# def get_profile_photo_url_for_user(
+#     *,
+#     user_id: str,
+# ) -> str:
+#     """
+#     Returns a signed URL for a user's profile photo.
+#     Raises UserProfileNotFound if photo not set.
+#     """
 
-    # ------------------------
-    # Validation
-    # ------------------------
-    if not is_allowed_social_platform(platform):
-        raise InvalidSocialPlatform("Invalid social platform")
+#     info = UsersInfo.query.filter_by(user_id=user_id).first()
+#     if not info or not info.profile_photo_key:
+#         raise UserProfilePhotoNotFound("Profile photo not found")
 
-    if not is_valid_social_handle(handle):
-        raise InvalidSocialHandle("Invalid social handle")
+#     return generate_signed_get_url(info.profile_photo_key)
 
-    try:
-        social = UserSocial.query.filter_by(
-            user_id=user_id,
-            platform=platform,
-        ).first()
 
-        if social:
-            # Update
-            social.handle = handle
-        else:
-            # Create
-            social = UserSocial(
-                user_id=user_id,
-                platform=platform,
-                handle=handle,
-            )
-            db.session.add(social)
+# def upsert_user_social(
+#     *,
+#     user_id: str,
+#     platform: str,
+#     handle: str,
+# ) -> None:
+#     """
+#     Create or update a user's social handle for a platform.
+#     One social per platform per user.
+#     """
 
-        db.session.commit()
+#     # ------------------------
+#     # Validation
+#     # ------------------------
+#     if not is_allowed_social_platform(platform):
+#         raise InvalidSocialPlatform("Invalid social platform")
 
-    except IntegrityError as e:
-        db.session.rollback()
-        raise SocialUpsertError("Failed to save social") from e
+#     if not is_valid_social_handle(handle):
+#         raise InvalidSocialHandle("Invalid social handle")
 
-    except Exception as e:
-        db.session.rollback()
-        raise SocialUpsertError("Failed to save social") from e
+#     try:
+#         social = UserSocial.query.filter_by(
+#             user_id=user_id,
+#             platform=platform,
+#         ).first()
+
+#         if social:
+#             # Update
+#             social.handle = handle
+#         else:
+#             # Create
+#             social = UserSocial(
+#                 user_id=user_id,
+#                 platform=platform,
+#                 handle=handle,
+#             )
+#             db.session.add(social)
+
+#         db.session.commit()
+
+#     except IntegrityError as e:
+#         db.session.rollback()
+#         raise SocialUpsertError("Failed to save social") from e
+
+#     except Exception as e:
+#         db.session.rollback()
+#         raise SocialUpsertError("Failed to save social") from e
