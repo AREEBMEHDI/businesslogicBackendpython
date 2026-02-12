@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, make_response
-from  client import create_client_with_profile
+from client import create_client_with_profile
 from auth import verify_access_token, create_access_token, create_refresh_token
-from client import update_user_profile_photo
+# from client import update_user_profile_photo
 from exceptions import (
     ClientCreationError,
     UsernameAlreadyExists,
