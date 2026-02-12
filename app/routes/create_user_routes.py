@@ -78,11 +78,11 @@ def register():
     except InvalidUserInfoData as e:
         return jsonify({"message": str(e)}), 400
 
-    except ClientCreationError:
-        return jsonify({"message": "Failed to create user"}), 500
+    except ClientCreationError as e:
+        return jsonify({"message": str(e)}), 500
 
-    except Exception:
-        return jsonify({"message": "Internal server error"}), 500
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
     
 
 @createuser_bp.route("/api/me/profile-photo", methods=["POST"])
