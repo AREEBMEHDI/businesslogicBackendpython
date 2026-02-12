@@ -126,8 +126,6 @@ def create_users_info(
             email=email,
             department=department,
             designation=designation,
-            designation=designation,
-            designation=designation,
             phone=phone,
             employee_id=employee_id,
             gender=gender,
