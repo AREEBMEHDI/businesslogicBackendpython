@@ -184,7 +184,7 @@ def create_client_with_profile(
         raise
     except Exception as e:
         db.session.rollback()
-        raise ClientCreationError("Failed to create client with profile") from e
+        raise ClientCreationError(e) from e
     
 
 # def upload_profile_photo_to_spaces(
