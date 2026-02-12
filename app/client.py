@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from flask_bcrypt import Bcrypt
 # from helper_func import detect_image_extension
-from models import db, Users, Clients, Auth, UsersInfo, UserSocial
+from models import db, Users, Clients, Auth, UsersInfo
 # from validations import is_valid_profile_image, is_allowed_social_platform, is_valid_social_handle
 # from spaces import get_spaces, generate_signed_get_url, DO_SPACES_BUCKET
 import imghdr
