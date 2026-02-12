@@ -21,7 +21,6 @@ class Users(db.Model):
     admin = db.relationship("Admins", backref="user", uselist=False)
     client = db.relationship("Clients", backref="user", uselist=False)
     users_info = db.relationship("UsersInfo", backref="user", uselist=False)
-    users_socials = db.relationship("UserSocial", backref="user", lazy="dynamic", cascade="all, delete-orphan")
     admin = db.relationship(
         "Admins",
         foreign_keys="Admins.user_id",
