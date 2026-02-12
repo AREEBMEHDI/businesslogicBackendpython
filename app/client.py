@@ -143,7 +143,6 @@ def create_client_with_profile(
     username: str,
     password: str,
     email: str,
-    user_id: str,
     name: str,
     department: str,
     designation: str,
