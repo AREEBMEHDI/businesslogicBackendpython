@@ -170,7 +170,6 @@ def create_client_with_profile(
             email=email,
             user_id=user_id,
             name=name,
-            user_id=user_id,
             department=department,
             designation=designation,
             phone=phone,
