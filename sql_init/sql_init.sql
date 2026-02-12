@@ -136,20 +136,52 @@ CREATE TABLE IF NOT EXISTS users_info (
 
     profile_photo_key VARCHAR(255) NULL,
 
-    display_name VARCHAR(100)
+    name VARCHAR(100)
         CHARACTER SET utf8mb4
         COLLATE utf8mb4_unicode_ci
         NOT NULL,
 
-    gender ENUM('male', 'female') NOT NULL,
-
-    vibe VARCHAR(150)
+    email VARCHAR(150)
         CHARACTER SET utf8mb4
         COLLATE utf8mb4_unicode_ci
+        UNIQUE
         NULL,
 
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL
+    department ENUM(
+        'software_development',
+        'qa',
+        'devops',
+        'hr',
+        'finance',
+        'sales'
+    ) NOT NULL,
+
+    designation ENUM(
+        'junior_developer',
+        'developer',
+        'senior_developer',
+        'tech_lead',
+        'engineering_manager'
+    ) NOT NULL,
+
+    phone VARCHAR(15)
+        CHARACTER SET ascii
+        NOT NULL
+        UNIQUE,
+
+    employee_id VARCHAR(20)
+        CHARACTER SET ascii
+        NOT NULL
+        UNIQUE,
+
+    gender ENUM('male', 'female') NOT NULL,
+
+    created_at DATETIME
+        NOT NULL
+        DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at DATETIME
+        NOT NULL
         DEFAULT CURRENT_TIMESTAMP
         ON UPDATE CURRENT_TIMESTAMP,
 
@@ -162,4 +194,5 @@ CREATE TABLE IF NOT EXISTS users_info (
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_unicode_ci;
+
 
