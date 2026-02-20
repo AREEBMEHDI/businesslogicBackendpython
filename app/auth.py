@@ -6,6 +6,7 @@ from exceptions import (
     MissingCredentials,
     InvalidCredentials,
     InactiveUser,
+    NotAnAdmin,
     MissingRefreshToken,
     InvalidRefreshToken,
     MissingAccessToken,
@@ -39,6 +40,19 @@ def authenticate_user(username: str, password: str) -> str:
         raise InactiveUser("User account is inactive")
 
     return auth.user_id
+
+def authenticate_admin(username: str, password: str) -> str:
+    """
+    Verifies username & password, then checks admin role.
+    Returns user_id if valid admin.
+    Raises AuthenticationError subclasses on failure.
+    """
+    user_id = authenticate_user(username, password)
+
+    if not is_admin_user(user_id):
+        raise NotAnAdmin("User is not an admin")
+
+    return user_id
 
 def create_access_token(user_id, minutes=15):
     raw_token = secrets.token_hex(32)

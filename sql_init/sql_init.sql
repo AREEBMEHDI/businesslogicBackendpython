@@ -195,4 +195,91 @@ CREATE TABLE IF NOT EXISTS users_info (
 DEFAULT CHARSET=utf8mb4
 COLLATE=utf8mb4_unicode_ci;
 
+-- =========================
+-- LEAVE REQUESTS
+-- =========================
+CREATE TABLE IF NOT EXISTS leave_requests (
+    leave_id BIGINT NOT NULL AUTO_INCREMENT,
+
+    user_id VARCHAR(36)
+        CHARACTER SET ascii
+        COLLATE ascii_bin
+        NOT NULL,
+
+    leave_type ENUM(
+        'casual_leave',
+        'sick_leave',
+        'annual_leave',
+        'emergency_leave'
+    ) NOT NULL,
+
+    from_date DATE NOT NULL,
+    to_date DATE NOT NULL,
+    days INT NOT NULL,
+
+    reason TEXT
+        CHARACTER SET utf8mb4
+        COLLATE utf8mb4_unicode_ci
+        NOT NULL,
+
+    status ENUM('pending', 'approved', 'rejected')
+        NOT NULL
+        DEFAULT 'pending',
+
+    created_at DATETIME
+        NOT NULL
+        DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at DATETIME
+        NOT NULL
+        DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (leave_id),
+    KEY idx_leave_user_id (user_id),
+
+    CONSTRAINT fk_leave_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- =========================
+-- ATTENDANCE
+-- =========================
+CREATE TABLE IF NOT EXISTS attendance (
+    attendance_id BIGINT NOT NULL AUTO_INCREMENT,
+
+    user_id VARCHAR(36)
+        CHARACTER SET ascii
+        COLLATE ascii_bin
+        NOT NULL,
+
+    date DATE NOT NULL,
+
+    clock_in DATETIME NOT NULL,
+    clock_out DATETIME NULL,
+
+    status ENUM('present', 'absent', 'half_day', 'late')
+        NOT NULL
+        DEFAULT 'present',
+
+    created_at DATETIME
+        NOT NULL
+        DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at DATETIME
+        NOT NULL
+        DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (attendance_id),
+    UNIQUE KEY uq_attendance_user_date (user_id, date),
+    KEY idx_attendance_user_id (user_id),
+
+    CONSTRAINT fk_attendance_user
+        FOREIGN KEY (user_id)
+        REFERENCES users(user_id)
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
 

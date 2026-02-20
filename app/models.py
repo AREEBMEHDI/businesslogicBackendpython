@@ -90,3 +90,39 @@ class UsersInfo(db.Model):
     gender = db.Column(db.Enum('male', 'female', name='gender_enum'), nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.now(), nullable=False)
     updated_at = db.Column( db.DateTime, default=db.func.now(), onupdate=db.func.now(), nullable=False)
+
+
+class LeaveRequests(db.Model):
+    __tablename__ = 'leave_requests'
+
+    leave_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.String(36), db.ForeignKey('users.user_id', ondelete='CASCADE'), index=True, nullable=False)
+    leave_type = db.Column(db.Enum('casual_leave', 'sick_leave', 'annual_leave', 'emergency_leave', name='leave_type_enum'), nullable=False)
+    from_date = db.Column(db.Date, nullable=False)
+    to_date = db.Column(db.Date, nullable=False)
+    days = db.Column(db.Integer, nullable=False)
+    reason = db.Column(db.Text, nullable=False)
+    status = db.Column(db.Enum('pending', 'approved', 'rejected', name='leave_status_enum'), nullable=False, default='pending')
+    created_at = db.Column(db.DateTime, default=db.func.now(), nullable=False)
+    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now(), nullable=False)
+
+    user = db.relationship("Users", backref=db.backref("leave_requests", cascade="all, delete-orphan"))
+
+
+class Attendance(db.Model):
+    __tablename__ = 'attendance'
+
+    attendance_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.String(36), db.ForeignKey('users.user_id', ondelete='CASCADE'), index=True, nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    clock_in = db.Column(db.DateTime, nullable=False)
+    clock_out = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.Enum('present', 'absent', 'half_day', 'late', name='attendance_status_enum'), nullable=False, default='present')
+    created_at = db.Column(db.DateTime, default=db.func.now(), nullable=False)
+    updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now(), nullable=False)
+
+    user = db.relationship("Users", backref=db.backref("attendance_records", cascade="all, delete-orphan"))
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'date', name='uq_attendance_user_date'),
+    )

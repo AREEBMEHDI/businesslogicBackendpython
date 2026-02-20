@@ -44,6 +44,11 @@ class MissingCredentials(AuthenticationError):
     pass
 
 
+class NotAnAdmin(AuthenticationError):
+    """User is not an admin"""
+    pass
+
+
 ##########################################################
 
 class RefreshTokenError(Exception):
@@ -115,4 +120,60 @@ class InvalidSocialHandle(SocialMediaError):
 
 
 class SocialUpsertError(SocialMediaError):
+    pass
+
+
+#######################################################
+
+class LeaveRequestError(Exception):
+    """Base error for leave request failures."""
+    pass
+
+
+class InvalidLeaveData(LeaveRequestError):
+    """Raised when input validation fails."""
+    pass
+
+
+class LeaveRequestCreationError(LeaveRequestError):
+    """Raised when leave request creation fails."""
+    pass
+
+
+class LeaveRequestNotFound(LeaveRequestError):
+    """Raised when leave request does not exist."""
+    pass
+
+
+class LeaveAlreadyProcessed(LeaveRequestError):
+    """Raised when leave request has already been approved or rejected."""
+    pass
+
+
+#######################################################
+
+class AttendanceError(Exception):
+    """Base error for attendance failures."""
+    pass
+
+
+class AlreadyClockedIn(AttendanceError):
+    """Raised when user tries to clock in but already clocked in today."""
+    pass
+
+
+class NotClockedIn(AttendanceError):
+    """Raised when user tries to clock out but hasn't clocked in today."""
+    pass
+
+
+class AlreadyClockedOut(AttendanceError):
+    """Raised when user tries to clock out but already clocked out today."""
+    pass
+
+
+#######################################################
+
+class ReportError(Exception):
+    """Base error for report generation failures."""
     pass
